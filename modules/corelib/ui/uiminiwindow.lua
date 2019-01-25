@@ -346,6 +346,10 @@ function UIMiniWindow:setHeight(height)
   signalcall(self.onHeightChange, self, height)
 end
 
+function UIMiniWindow:getContentHeight()
+  return self:getChildById('contentsPanel'):getHeight()
+end
+
 function UIMiniWindow:setContentHeight(height)
   local contentsPanel = self:getChildById('contentsPanel')
   local minHeight = contentsPanel:getMarginTop() + contentsPanel:getMarginBottom() + contentsPanel:getPaddingTop() + contentsPanel:getPaddingBottom()
