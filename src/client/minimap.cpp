@@ -21,6 +21,7 @@
  */
 
 
+#include "game.h"
 #include "minimap.h"
 #include "tile.h"
 
@@ -206,8 +207,15 @@ void Minimap::updateTile(const Position& pos, const TilePtr& tile)
     if(minimapTile != MinimapTile()) {
         MinimapBlock& block = getBlock(pos);
         Point offsetPos = getBlockOffset(Point(pos.x, pos.y));
-        block.updateTile(pos.x - offsetPos.x, pos.y - offsetPos.y, minimapTile);
-        block.justSaw();
+		LocalPlayerPtr localPlayer = g_game.getLocalPlayer();
+		if (localPlayer == nullptr) {
+			return;
+		}
+		short playerPosZ = localPlayer->getPosition().z;
+		if (playerPosZ == pos.z) {
+			block.updateTile(pos.x - offsetPos.x, pos.y - offsetPos.y, minimapTile);
+			block.justSaw();
+		}
     }
 }
 
