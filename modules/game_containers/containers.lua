@@ -133,6 +133,9 @@ function onContainerOpen(container, previousContainer)
   local layout = containerPanel:getLayout()
   local cellSize = layout:getCellSize()
   containerWindow:setContentMinimumHeight(cellSize.height)
+  if containerWindow:getContentHeight() < cellSize.height then
+    containerWindow:setContentHeight(cellSize.height)
+  end
   containerWindow:setContentMaximumHeight(cellSize.height*layout:getNumLines())
 
   if not previousContainer then
