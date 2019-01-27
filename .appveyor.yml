@@ -1,0 +1,66 @@
+# https://www.appveyor.com/docs/environment-variables/
+
+image: Visual Studio 2017
+
+#shallow_clone: true
+
+platform:
+  - x64
+
+configuration:
+  - Debug
+  - Release
+
+version: build-{branch}.{build}
+
+matrix:
+  fast_finish: true
+
+only_commits:
+  files:
+    - src/
+    - vc14/
+    - appveyor.yml
+
+install:
+  - cmd: vcpkg install boost-iostreams:x64-windows
+  - cmd: vcpkg install boost-asio:x64-windows
+  - cmd: vcpkg install boost-system:x64-windows
+  - cmd: vcpkg install boost-variant:x64-windows
+  - cmd: vcpkg install boost-lockfree:x64-windows
+  - cmd: vcpkg install boost-filesystem:x64-windows
+  - cmd: vcpkg install boost-uuid:x64-windows
+  - cmd: vcpkg install glew:x64-windows
+  - cmd: vcpkg install libogg:x64-windows
+  - cmd: vcpkg install libvorbis:x64-windows
+  - cmd: vcpkg install luajit:x64-windows
+  - cmd: vcpkg install openal-soft:x64-windows
+  - cmd: vcpkg install physfs:x64-windows
+  - cmd: vcpkg install zlib:x64-windows
+
+build:
+  parallel: true
+  # MSBuild verbosity level
+  #verbosity: detailed
+
+before_build:
+  - cmd: FOR /F "tokens=*" %%g IN ('git describe --always') do (SET VERSION=%%g)
+
+environment:
+  BUILD_COMMIT: "$(APPVEYOR_REPO_COMMIT)"
+  BUILD_REVISION: "$(APPVEYOR_BUILD_NUMBER)"
+  BUILD_TYPE: "$(CONFIGURATION)"
+  VERSION: "$(VERSION)"
+
+cache:
+  - c:\tools\vcpkg\installed\ -> appveyor.yml
+  - vc14\x64
+
+after_build:
+  - cmd: 7z a otclient.zip otclient.exe *.dll data mods modules *.lua README.md LICENSE
+
+artifacts:
+  - path: otclient.exe
+    name: otclient-${CONFIGURATION}-${APPVEYOR_REPO_COMMIT}.exe
+  - path: otclient.zip
+    name: otclient-${CONFIGURATION}-${APPVEYOR_REPO_COMMIT}.zip

@@ -8,8 +8,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <FloatingPointModel>Fast</FloatingPointModel>
       <Optimization>Full</Optimization>
-      <ObjectFileName>$(IntDir)\obj_r\%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
@@ -17,4 +19,3 @@
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>
-

@@ -12,8 +12,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <ObjectFileName>$(IntDir)\obj_r\%(RelativeDir)</ObjectFileName>
-	  <AdditionalOptions>/bigobj%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/bigobj%(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(OTCLIENT_LIBDEPS_D)</AdditionalDependencies>
@@ -21,4 +20,3 @@
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>
-
