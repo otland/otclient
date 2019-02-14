@@ -28,12 +28,14 @@ offersTabBar = nil
 selectionTabBar = nil
 
 marketOffersPanel = nil
+marketOffersTab = nil
 browsePanel = nil
 overviewPanel = nil
 itemOffersPanel = nil
 itemDetailsPanel = nil
 itemStatsPanel = nil
 myOffersPanel = nil
+myOffersTab = nil
 currentOffersPanel = nil
 offerHistoryPanel = nil
 itemsPanel = nil
@@ -69,6 +71,9 @@ buyCancelButton = nil
 sellCancelButton = nil
 buyMyOfferTable = nil
 sellMyOfferTable = nil
+
+buyMyHistoryTable = nil
+sellMyHistoryTable = nil
 
 offerExhaust = {}
 marketOffers = {}
@@ -147,6 +152,13 @@ local function clearMyOffers()
   sellMyOfferTable:clearData()
 end
 
+local function clearMyHistory()
+  marketOffers[MarketAction.Buy] = {}
+  marketOffers[MarketAction.Sell] = {}
+  buyMyHistoryTable:clearData()
+  sellMyHistoryTable:clearData()
+end
+
 local function clearFilters()
   for _, filter in pairs(filterButtons) do
     if filter and filter:isChecked() ~= filter.default then
@@ -181,12 +193,16 @@ local function addOffer(offer, offerType)
   local price = offer:getPrice()
   local timestamp = offer:getTimeStamp()
   local itemName = offer:getItem():getMarketData().name
+  local state = offer:getStateString()
 
   buyOfferTable:toggleSorting(false)
   sellOfferTable:toggleSorting(false)
 
   buyMyOfferTable:toggleSorting(false)
   sellMyOfferTable:toggleSorting(false)
+
+  buyMyHistoryTable:toggleSorting(false)
+  sellMyHistoryTable:toggleSorting(false)
 
   if amount < 1 then return false end
   if offerType == MarketAction.Buy then
@@ -202,6 +218,15 @@ local function addOffer(offer, offerType)
         {text = price},
         {text = amount},
         {text = string.gsub(os.date('%c', timestamp), " ", "  "), sortvalue = timestamp}
+      })
+    elseif offer.var == MarketRequest.MyHistory then
+      row = buyMyHistoryTable:addRow({
+        {text = itemName},
+        {text = price*amount},
+        {text = price},
+        {text = amount},
+        {text = string.gsub(os.date('%c', timestamp), " ", "  "), sortvalue = timestamp},
+        {text = state}
       })
     else
       row = buyOfferTable:addRow({
@@ -232,6 +257,15 @@ local function addOffer(offer, offerType)
         {text = amount},
         {text = string.gsub(os.date('%c', timestamp), " ", "  "), sortvalue = timestamp}
       })
+    elseif offer.var == MarketRequest.MyHistory then
+      row = sellMyHistoryTable:addRow({
+        {text = itemName},
+        {text = price*amount},
+        {text = price},
+        {text = amount},
+        {text = string.gsub(os.date('%c', timestamp), " ", "  "), sortvalue = timestamp},
+        {text = state}
+      })
     else
       row = sellOfferTable:addRow({
         {text = player},
@@ -258,6 +292,11 @@ local function addOffer(offer, offerType)
   sellMyOfferTable:toggleSorting(false)
   buyMyOfferTable:sort()
   sellMyOfferTable:sort()
+
+  buyMyHistoryTable:toggleSorting(false)
+  sellMyHistoryTable:toggleSorting(false)
+  buyMyHistoryTable:sort()
+  sellMyHistoryTable:sort()
 
   return true
 end
@@ -331,6 +370,12 @@ local function updateOffers(offers)
 
   buyCancelButton:setEnabled(false)
   sellCancelButton:setEnabled(false)
+
+  buyMyOfferTable:clearData()
+  sellMyOfferTable:clearData()
+
+  buyMyHistoryTable:clearData()
+  sellMyHistoryTable:clearData()
 
   for _, offer in pairs(offers) do
     mergeOffer(offer)
@@ -741,7 +786,7 @@ local function initInterface()
 
   -- setup 'Market Offer' section tabs
   marketOffersPanel = g_ui.loadUI('ui/marketoffers')
-  mainTabBar:addTab(tr('Market Offers'), marketOffersPanel)
+  marketOffersTab = mainTabBar:addTab(tr('Market Offers'), marketOffersPanel)
 
   selectionTabBar = marketOffersPanel:getChildById('leftTabBar')
   selectionTabBar:setContentWidget(marketOffersPanel:getChildById('leftTabContent'))
@@ -769,7 +814,8 @@ local function initInterface()
 
   -- setup 'My Offer' section tabs
   myOffersPanel = g_ui.loadUI('ui/myoffers')
-  mainTabBar:addTab(tr('My Offers'), myOffersPanel)
+  myOffersTab = mainTabBar:addTab(tr('My Offers'), myOffersPanel)
+  myOffersTab.onClick = function() Market.refreshMyOffers() Market.refreshMyHistory() mainTabBar:selectTab(myOffersTab) end
 
   offersTabBar = myOffersPanel:getChildById('offersTabBar')
   offersTabBar:setContentWidget(myOffersPanel:getChildById('offersTabContent'))
@@ -869,6 +915,9 @@ local function initInterface()
   sellCancelButton = currentOffersPanel:getChildById('sellCancelButton')
   sellCancelButton.onClick = function() cancelMyOffer(MarketAction.Sell) end
 
+  -- setup history
+  buyMyHistoryTable = offerHistoryPanel:recursiveGetChildById('myHistoryBuyingTable')
+  sellMyHistoryTable = offerHistoryPanel:recursiveGetChildById('myHistorySellingTable')
 
   buyStatsTable:setColumnWidth({120, 270})
   sellStatsTable:setColumnWidth({120, 270})
@@ -879,6 +928,9 @@ local function initInterface()
 
   buyMyOfferTable:setSorting(3, TABLE_SORTING_DESC)
   sellMyOfferTable:setSorting(3, TABLE_SORTING_DESC)
+
+  buyMyHistoryTable:setSorting(5, TABLE_SORTING_DESC)
+  sellMyHistoryTable:setSorting(5, TABLE_SORTING_DESC)
 end
 
 function init()
@@ -921,11 +973,16 @@ function Market.reset()
   balanceLabel:setColor('#bbbbbb')
   categoryList:setCurrentOption(getMarketCategoryName(MarketCategory.First))
   searchEdit:setText('')
+
   clearFilters()
   clearMyOffers()
+  clearMyHistory()
+
   if not table.empty(information) then
     Market.updateCurrentItems()
   end
+
+  mainTabBar:selectTab(marketOffersTab)
 end
 
 function Market.displayMessage(message)
@@ -1080,6 +1137,7 @@ function Market.refreshOffers()
     Market.onItemBoxChecked(selectedItem.ref)
   else
     Market.refreshMyOffers()
+    Market.refreshMyHistory()
   end
 end
 
@@ -1088,6 +1146,10 @@ function Market.refreshMyOffers()
   MarketProtocol.sendMarketBrowseMyOffers()
 end
 
+function Market.refreshMyHistory()
+  clearMyHistory()
+  MarketProtocol.sendMarketBrowseMyHistory()
+end
 
 function Market.loadMarketItems(category)
   clearItems()
@@ -1252,6 +1314,8 @@ function Market.onMarketEnter(depotItems, offers, balance, vocation)
     marketWindow:lock()
     marketWindow:show()
   end
+
+  mainTabBar:selectTab(marketOffersTab)
 end
 
 function Market.onMarketLeave()

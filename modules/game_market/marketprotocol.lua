@@ -29,11 +29,10 @@ local function readMarketOffer(msg, action, var)
   local state = MarketOfferState.Active
   if var == MarketRequest.MyHistory then
     state = msg:getU8()
-  elseif var == MarketRequest.MyOffers then
-  else
+  elseif var ~= MarketRequest.MyOffers then
     playerName = msg:getString()
   end
-
+  
   return MarketOffer.new({timestamp, counter}, action, Item.create(itemId), amount, price, playerName, state, var)
 end
 
@@ -204,6 +203,10 @@ end
 
 function MarketProtocol.sendMarketBrowseMyOffers()
   MarketProtocol.sendMarketBrowse(MarketRequest.MyOffers)
+end
+
+function MarketProtocol.sendMarketBrowseMyHistory()
+  MarketProtocol.sendMarketBrowse(MarketRequest.MyHistory)
 end
 
 function MarketProtocol.sendMarketCreateOffer(type, spriteId, amount, price, anonymous)
