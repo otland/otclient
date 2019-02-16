@@ -143,6 +143,18 @@ function MarketOffer:getState()
   return self.state
 end
 
+function MarketOffer:getStateString()
+  local state = self.state
+  if state == 0 then
+    return 'active'
+  elseif state == 1 then
+    return 'cancelled'
+  elseif state == 2 then
+    return 'expired'
+  end
+  return 'accepted'
+end
+
 function MarketOffer:getTimeStamp()
   if table.empty(self.id)  or #self.id < OFFER_TIMESTAMP then
     return
