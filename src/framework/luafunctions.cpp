@@ -296,7 +296,7 @@ void Application::registerLuaFunctions()
     g_lua.bindSingletonFunction("g_window", "isFullscreen", &PlatformWindow::isFullscreen, &g_window);
     g_lua.bindSingletonFunction("g_window", "isMaximized", &PlatformWindow::isMaximized, &g_window);
     g_lua.bindSingletonFunction("g_window", "hasFocus", &PlatformWindow::hasFocus, &g_window);
-	g_lua.bindSingletonFunction("g_window", "makeScreenShot", &PlatformWindow::makeScreenShot, &g_window);
+    g_lua.bindSingletonFunction("g_window", "makeScreenShot", &PlatformWindow::makeScreenShot, &g_window);
 
     // Input
     g_lua.registerSingletonClass("g_mouse");
