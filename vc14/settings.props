@@ -10,9 +10,7 @@
     <OPEN_SSL_DIR>$(OTCLIENTSDKDir)\OpenSSL-1.0.2j\</OPEN_SSL_DIR>
     <PHYSFS_DIR>$(OTCLIENTSDKDir)\physfs-2.0.3.1\</PHYSFS_DIR>
     <ZLIB_DIR>$(OTCLIENTSDKDir)\zlib-1.2.8.8\</ZLIB_DIR>
-
-    <PREPROCESSOR_DEFS>
-        WIN32;
+    <PREPROCESSOR_DEFS>WIN32;
         _CRT_SECURE_NO_WARNINGS;
         _WIN32_WINNT=0x0501;
         BOT_PROTECTION;
@@ -22,13 +20,11 @@
         FW_NET;
         FW_SOUND;
         FW_XML;
-        BUILD_TYPE="RelWithDebInfo";
-        BUILD_COMMIT="devel";
-        BUILD_REVISION="0";
-        VERSION="0.6.6";
-        AB
-    </PREPROCESSOR_DEFS>
-    
+        BUILD_TYPE="$(BUILD_TYPE)";
+        BUILD_COMMIT="$(BUILD_COMMIT)";
+        BUILD_REVISION="$(BUILD_REVISION)";
+        VERSION="$(VERSION)";
+        AB</PREPROCESSOR_DEFS>
     <OTCLIENT_INCLUDES>
         $(BOOST_ROOT_OTCLIENT);
         $(LUA_DIR)\include;
@@ -40,7 +36,6 @@
         $(PHYSFS_DIR)\include;
         $(ZLIB_DIR)\include
     </OTCLIENT_INCLUDES>
-    
     <OTCLIENT_LIBS>
         $(BOOST_ROOT_OTCLIENT)\lib32-msvc-14.0;
         $(LUA_DIR)\lib;
@@ -52,7 +47,6 @@
         $(PHYSFS_DIR)\lib;
         $(ZLIB_DIR)\lib
     </OTCLIENT_LIBS>
-    
     <OTCLIENT_LIBS64>
         $(BOOST_ROOT_OTCLIENT)\lib64-msvc-14.0;
         $(LUA_DIR)\lib64;
@@ -64,7 +58,6 @@
         $(PHYSFS_DIR)\lib64;
         $(ZLIB_DIR)\lib64
     </OTCLIENT_LIBS64>
-    
     <OTCLIENT_LIBDEPS>
         glew32.lib;
         zlib.lib;
@@ -83,10 +76,9 @@
         gdi32.lib;
         advapi32.lib;
     </OTCLIENT_LIBDEPS>
-    
     <OTCLIENT_LIBDEPS_D>
-        glew32.lib;
-        zlib.lib;
+        glew32d.lib;
+        zlibd.lib;
         libeay32.lib;
         physfs.lib;
         openal32.lib;
@@ -102,7 +94,10 @@
         gdi32.lib;
         advapi32.lib;
 	</OTCLIENT_LIBDEPS_D>
-    
+    <BUILD_TYPE>RelWithDebInfo</BUILD_TYPE>
+    <BUILD_COMMIT>devel</BUILD_COMMIT>
+    <BUILD_REVISION>0</BUILD_REVISION>
+    <VERSION>0</VERSION>
   </PropertyGroup>
   <PropertyGroup>
     <LinkIncremental>false</LinkIncremental>
@@ -114,6 +109,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <ObjectFileName>$(IntDir)\obj_r\$(Configuration)\%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(OTCLIENT_LIBDEPS)</AdditionalDependencies>
@@ -160,7 +156,6 @@
       <Value>$(ZLIB_DIR)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>
     </BuildMacro>
-    
     <BuildMacro Include="PREPROCESSOR_DEFS">
       <Value>$(PREPROCESSOR_DEFS)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>
@@ -183,6 +178,22 @@
     </BuildMacro>
     <BuildMacro Include="OTCLIENT_LIBDEPS_D">
       <Value>$(OTCLIENT_LIBDEPS_D)</Value>
+    </BuildMacro>
+    <BuildMacro Include="BUILD_TYPE">
+      <Value>$(BUILD_TYPE)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="BUILD_COMMIT">
+      <Value>$(BUILD_COMMIT)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="BUILD_REVISION">
+      <Value>$(BUILD_REVISION)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="VERSION">
+      <Value>$(VERSION)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
     </BuildMacro>
   </ItemGroup>
 </Project>

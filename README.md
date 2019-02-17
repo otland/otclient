@@ -14,8 +14,9 @@ or connect to one listed on [otservlist](https://otservlist.org/).
 
 ### Where do I download?
 
-Compiled for Windows can be found here (but can be outdated):
-* [Windows Builds](http://otland.net/threads/otclient-builds-windows.217977/)
+Compiled for Windows can be found here:
+* [Automated builds](https://ci.appveyor.com/project/otland/otclient/branch/master/artifacts)
+* [Windows Builds on Otland](http://otland.net/threads/otclient-builds-windows.217977/)
 
 **NOTE:** You will need to download spr/dat files on your own and place them in `data/things/VERSION/` (i.e: `data/things/1098/Tibia.spr`)
 
@@ -61,7 +62,7 @@ We encourage you to contribute to otclient! You can make pull requests of any im
 
 ### Contact
 
-Talk directly with us at the gitter chat [![Join the chat at https://gitter.im/edubart/otclient](https://img.shields.io/badge/GITTER-join%20chat-green.svg)](https://gitter.im/edubart/otclient?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge).
+Check out [OTClient Forum on Otland.net](https://otland.net/forums/otclient.494/).
 
 ### License
 
