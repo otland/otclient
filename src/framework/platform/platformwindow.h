@@ -94,7 +94,7 @@ public:
     void setOnResize(const OnResizeCallback& onResize) { m_onResize = onResize; }
     void setOnInputEvent(const OnInputEventCallback& onInputEvent) { m_onInputEvent = onInputEvent; }
 
-	void makeScreenShot(std::string file);
+    void makeScreenShot(std::string file);
 
 protected:
     virtual int internalLoadMouseCursor(const ImagePtr& image, const Point& hotSpot) = 0;
@@ -131,7 +131,7 @@ protected:
     OnInputEventCallback m_onInputEvent;
 
 private:
-	void changeScreenShotOrientation(uint8* pixels, uint arrayLength, uint widthLength, uint heightLength, std::string file);
+    void changeScreenShotOrientation(uint8* pixels, uint arrayLength, uint widthLength, uint heightLength, std::string file);
 };
 
 extern PlatformWindow& g_window;
