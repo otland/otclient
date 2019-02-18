@@ -236,6 +236,7 @@ void PlatformWindow::makeScreenShot(std::string file) {
     boost::filesystem::path dirPath(file);
 
     if (!g_resources.directoryExists(dirPath.parent_path().string())) {
+        g_logger.error("Unable to find path: " + dirPath.parent_path().string());
         return;
     }
 
