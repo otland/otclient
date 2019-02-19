@@ -33,6 +33,7 @@ X11Window window;
 
 #include <framework/core/clock.h>
 #include <framework/graphics/image.h>
+#include <framework/core/resourcemanager.h>
 
 PlatformWindow& g_window = window;
 
@@ -182,3 +183,69 @@ void PlatformWindow::fireKeysPress()
     }
 }
 
+void PlatformWindow::changeScreenShotOrientation(uint8* pixels, uint arrayLength, uint widthLength, uint heightLength, std::string file) {
+
+    //Reverse from left bottom corner to right top corner
+
+    uint8* pixelsReverse = new uint8[arrayLength];
+
+    for (uint i = 0; i < arrayLength; i = i + 4) {
+        pixelsReverse[arrayLength - (i + 3)] = pixels[i + 1];
+        pixelsReverse[arrayLength - (i + 2)] = pixels[i + 2];
+        pixelsReverse[arrayLength - (i + 1)] = pixels[i + 3];
+        pixelsReverse[arrayLength - i] = pixels[i];
+    }
+
+    //Width mirror reflection
+
+    uint8* pixelsReflection = new uint8[arrayLength];
+
+    uint reflectionWidth = floor(widthLength / 2);
+    for (uint i = 0; i < heightLength; i++) {
+        uint realHeightPixels = i * widthLength * 4;
+        for (uint j = 1; j <= reflectionWidth; j++) {
+            pixelsReflection[realHeightPixels + 4 * j] = pixelsReverse[realHeightPixels + 4 * widthLength - (4 * j)];
+            pixelsReflection[realHeightPixels + 4 * j + 1] = pixelsReverse[realHeightPixels + 4 * widthLength - (4 * j + 3)];
+            pixelsReflection[realHeightPixels + 4 * j + 2] = pixelsReverse[realHeightPixels + 4 * widthLength - (4 * j + 2)];
+            pixelsReflection[realHeightPixels + 4 * j + 3] = pixelsReverse[realHeightPixels + 4 * widthLength - (4 * j + 1)];
+
+            pixelsReflection[realHeightPixels + 4 * widthLength - 4 * j] = pixelsReverse[realHeightPixels + 4 * j];
+            pixelsReflection[realHeightPixels + 4 * widthLength - (4 * j + 1)] = pixelsReverse[realHeightPixels + 4 * j + 3];
+            pixelsReflection[realHeightPixels + 4 * widthLength - (4 * j + 2)] = pixelsReverse[realHeightPixels + 4 * j + 2];
+            pixelsReflection[realHeightPixels + 4 * widthLength - (4 * j + 3)] = pixelsReverse[realHeightPixels + 4 * j + 1];
+        }
+        if (widthLength % 2 == 1) {
+            pixelsReflection[realHeightPixels + 1 + 4 * reflectionWidth] = pixelsReverse[realHeightPixels + 1 + 4 * reflectionWidth];
+            pixelsReflection[realHeightPixels + 1 + 4 * reflectionWidth + 1] = pixelsReverse[realHeightPixels + 1 + 4 * reflectionWidth + 3];
+            pixelsReflection[realHeightPixels + 1 + 4 * reflectionWidth + 2] = pixelsReverse[realHeightPixels + 1 + 4 * reflectionWidth + 2];
+            pixelsReflection[realHeightPixels + 1 + 4 * reflectionWidth + 3] = pixelsReverse[realHeightPixels + 1 + 4 * reflectionWidth + 1];
+        }
+    }
+
+    ImagePtr image(new Image(Size(getWidth(), getHeight()), 4, pixelsReflection));
+
+    delete[] pixels;
+    delete[] pixelsReverse;
+
+    image->savePNG(file);
+
+    delete[] pixelsReflection;
+}
+
+void PlatformWindow::makeScreenShot(std::string file) {
+    boost::filesystem::path dirPath(file);
+
+    if (!g_resources.directoryExists(dirPath.parent_path().string())) {
+        g_logger.error("Unable to find path: " + dirPath.parent_path().string());
+        return;
+    }
+
+    uint arrayLength = 4 * getWidth() * getHeight();
+    uint widthLength = getWidth();
+    uint heightLength = getHeight();
+    uint8* pixels = new uint8[arrayLength];
+
+    glReadPixels(0, 0, getWidth(), getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+    boost::thread thread = boost::thread(&PlatformWindow::changeScreenShotOrientation, this, pixels, arrayLength, widthLength, heightLength, file);
+}
