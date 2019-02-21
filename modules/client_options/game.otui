@@ -27,6 +27,10 @@ Panel
     !text: tr('Show left panel')
 
   OptionCheckBox
+    id: moveWindowsToPanel
+    !text: tr('Move windows to panel')
+
+  OptionCheckBox
     id: displayNames
     !text: tr('Display creature names')
 
