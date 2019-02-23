@@ -45,24 +45,29 @@ function onGameEditText(id, itemId, maxLength, text, writer, time)
   textEdit:setEditable(writeable)
   textEdit:setCursorVisible(writeable)
 
-  local desc = ''
+  local desc = 'You read the following'
   if #writer > 0 then
-    desc = tr('You read the following, written by \n%s\n', writer)
+    desc = desc .. tr(', written by \n%s', writer)
     if #time > 0 then
-      desc = desc .. tr('on %s.\n', time)
+      desc = desc .. tr(' on %s.', time)
     end
   elseif #time > 0 then
-    desc = tr('You read the following, written on \n%s.\n', time)
+    desc = desc .. tr(', written on \n%s.', time)
+  else
+    desc = desc .. '.'
   end
 
-  if #text == 0 and not writeable then
-    desc = tr("It is empty.")
-  elseif writeable then
-    desc = desc .. tr('You can enter new text.')
+  if #text == 0 then
+    if not writeable then
+      desc = tr("It is empty.")
+    else
+      desc = tr("It is currently empty.")
+    end
   end
 
-  local lines = #{string.find(desc, '\n')}
-  if lines < 2 then desc = desc .. '\n' end
+  if writeable then
+    desc = desc .. tr('\nYou can enter new text.')
+  end
 
   description:setText(desc)
 
@@ -75,8 +80,9 @@ function onGameEditText(id, itemId, maxLength, text, writer, time)
     textWindow:setText(tr('Edit Text'))
   end
 
-  if description:getHeight() < 64 then
-    description:setHeight(64)
+  if description:getHeight() < 34 then
+    description:setTextAutoResize(false)
+    description:setHeight(34)
   end
 
   local function destroy()
@@ -112,18 +118,20 @@ function onGameEditList(id, doorId, text)
   local cancelButton = textWindow:getChildById('cancelButton')
 
   local textItem = textWindow:getChildById('textItem')
-  if textItem and not textItem:isHidden() then
-    textItem:hide()
+  if textItem and textItem:isHidden() then
+    textItem:show()
   end
 
+  textItem:setItemId(2819)
   textEdit:setMaxLength(8192)
   textEdit:setText(text)
   textEdit:setEditable(true)
   description:setText(tr('Enter one name per line.'))
   textWindow:setText(tr('Edit List'))
 
-  if description:getHeight() < 64 then
-    description:setHeight(64)
+  if description:getHeight() < 34 then
+    description:setTextAutoResize(false)
+    description:setHeight(34)
   end
 
   local function destroy()
