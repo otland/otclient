@@ -906,7 +906,11 @@ int Creature::getStepDuration(bool ignoreDiagonal, Otc::Direction dir)
        m_lastStepDirection == Otc::SouthWest || m_lastStepDirection == Otc::SouthEast))
         interval *= factor;
 
-    return interval;
+    if (this->isLocalPlayer()) {
+		return interval;
+	}
+
+    return (int)interval*0.8f;
 }
 
 Point Creature::getDisplacement()
