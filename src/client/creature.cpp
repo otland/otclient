@@ -906,7 +906,7 @@ int Creature::getStepDuration(bool ignoreDiagonal, Otc::Direction dir)
        m_lastStepDirection == Otc::SouthWest || m_lastStepDirection == Otc::SouthEast))
         interval *= factor;
 
-    if(g_game.getClientVersion() >= 1098 && !this->isLocalPlayer) {
+    if(g_game.getClientVersion() >= 1098 && !this->isLocalPlayer()) {
         return (int)interval*0.8f;
     }
     
