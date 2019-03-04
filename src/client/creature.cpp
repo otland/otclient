@@ -490,7 +490,8 @@ void Creature::updateWalkAnimation(int totalPixelsWalked)
         return;
 
     int footAnimPhases = getAnimationPhases() - 1;
-    int footDelay = getStepDuration(true) / 3;
+    int footDelay = getStepDuration(true) / getAnimationPhases() + 15;
+    
     // Since mount is a different outfit we need to get the mount animation phases
     if(m_outfit.getMount() != 0) {
         ThingType *type = g_things.rawGetThingType(m_outfit.getMount(), m_outfit.getCategory());
@@ -881,22 +882,26 @@ int Creature::getStepDuration(bool ignoreDiagonal, Otc::Direction dir)
     int interval = 1000;
     if(groundSpeed > 0 && speed > 0)
         interval = 1000 * groundSpeed;
-
-    if(g_game.getFeature(Otc::GameNewSpeedLaw) && hasSpeedFormula()) {
-        int formulatedSpeed = 1;
-        if(speed > -m_speedFormula[Otc::SpeedFormulaB]) {
-            formulatedSpeed = std::max<int>(1, (int)floor((m_speedFormula[Otc::SpeedFormulaA] * log((speed / 2)
-                 + m_speedFormula[Otc::SpeedFormulaB]) + m_speedFormula[Otc::SpeedFormulaC]) + 0.5));
+    
+    if(g_game.getFeature(Otc::GameNewSpeedLaw)) {
+        if (groundSpeed > 110 && groundSpeed < 160 && speed >= 500) {
+            interval *= 1.1f;
         }
+        double formulatedSpeed = 1.0;
+        formulatedSpeed = std::max<double>(1, (double)floor((857.36 * log((speed / 2) + 261.29) + -4795.01) + 0.5));
         interval = std::floor(interval / (double)formulatedSpeed);
+        
+        if(isLocalPlayer())
+            interval *= 1.12f;
+        else if(isPlayer())
+            interval *= 1.22f;
+        else
+            interval *= 1.1f;
     }
     else
         interval /= speed;
 
-    if(g_game.getClientVersion() >= 900)
-        interval = (interval / g_game.getServerBeat()) * g_game.getServerBeat();
-
-    float factor = 3;
+    float factor = 2.5;
     if(g_game.getClientVersion() <= 810)
         factor = 2;
 
