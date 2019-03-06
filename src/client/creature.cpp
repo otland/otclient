@@ -514,8 +514,8 @@ void Creature::updateWalkAnimation(int totalPixelsWalked)
     int footDelay = getStepDuration(true) / getAnimationPhases() + 15;
     if (m_outfit.getMount() != 0) {
         auto datType = g_things.rawGetThingType(m_outfit.getMount(), ThingCategoryCreature);
+        footAnimPhases = datType->getAnimationPhases() - 1;
         if (datType->getIdleAnimator() != nullptr) {
-            footAnimPhases = datType->getAnimationPhases();
             footDelay = getStepDuration(true) / ceil(footAnimPhases / 2) + 15;
         }
     } else if (getIdleAnimator() != nullptr) {
@@ -523,10 +523,6 @@ void Creature::updateWalkAnimation(int totalPixelsWalked)
     }
 
     // Since mount is a different outfit we need to get the mount animation phases
-    if(m_outfit.getMount() != 0) {
-        ThingType *type = g_things.rawGetThingType(m_outfit.getMount(), m_outfit.getCategory());
-        footAnimPhases = type->getAnimationPhases() - 1;
-    }
     if(footAnimPhases == 0)
         m_walkAnimationPhase = 0;
     else if(m_footStepDrawn && m_footTimer.ticksElapsed() >= footDelay && totalPixelsWalked < 32) {
