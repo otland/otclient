@@ -109,11 +109,18 @@ void Creature::internalDrawOutfit(Point dest, float scaleFactor, bool animateWal
     // outfit is a real creature
     if(m_outfit.getCategory() == ThingCategoryCreature) {
         int animationPhase = animateWalk ? m_walkAnimationPhase : 0;
-
-        if(isAnimateAlways() && animateIdle) {
-            int ticksPerFrame = 1000 / getAnimationPhases();
-            animationPhase = (g_clock.millis() % (ticksPerFrame * getAnimationPhases())) / ticksPerFrame;
+        if (!isWalking() && animateIdle && getIdleAnimator() != nullptr)
+            animationPhase = getIdleAnimator()->getPhase();
+        else if (isWalking() && animateWalk && getAnimator() != nullptr) {
+            int halfAnimationPhases = ceil(getAnimationPhases() / 2);
+            if (m_outfit.getMount() == 0 && getIdleAnimator() != nullptr && animationPhase < halfAnimationPhases) {
+                animationPhase = halfAnimationPhases;
+                m_footStep = halfAnimationPhases;
+            }
         }
+
+        if(isAnimateAlways())
+            animationPhase = getAnimator()->getPhase();
 
         // xPattern => creature direction
         int xPattern;
@@ -127,8 +134,22 @@ void Creature::internalDrawOutfit(Point dest, float scaleFactor, bool animateWal
         int zPattern = 0;
         if(m_outfit.getMount() != 0) {
             auto datType = g_things.rawGetThingType(m_outfit.getMount(), ThingCategoryCreature);
+            int animationPhaseMount = animateWalk ? m_walkAnimationPhase : 0;
+            if (datType->getIdleAnimator() != nullptr && !isWalking() && animateIdle)
+                animationPhaseMount = datType->getIdleAnimator()->getPhase();
+            else if (animateWalk && datType->getAnimator() != nullptr && isWalking()) {
+                int animationPhases = getAnimationPhases();
+                if (datType->getAnimationPhases() > animationPhases) {
+                    animationPhase = animationPhase % animationPhases;
+                }
+                int halfAnimationPhasesMount = ceil(datType->getAnimationPhases() / 2);
+                if (datType->getIdleAnimator() != nullptr && animationPhaseMount < halfAnimationPhasesMount) {
+                    animationPhaseMount = halfAnimationPhasesMount;
+                    m_footStep = halfAnimationPhasesMount;
+                }
+            }
             dest -= datType->getDisplacement() * scaleFactor;
-            datType->draw(dest, scaleFactor, 0, xPattern, 0, 0, animationPhase, lightView);
+            datType->draw(dest, scaleFactor, 0, xPattern, 0, 0, animationPhaseMount, lightView);
             dest += getDisplacement() * scaleFactor;
             zPattern = std::min<int>(1, getNumPatternZ() - 1);
         }
@@ -491,7 +512,16 @@ void Creature::updateWalkAnimation(int totalPixelsWalked)
 
     int footAnimPhases = getAnimationPhases() - 1;
     int footDelay = getStepDuration(true) / getAnimationPhases() + 15;
-    
+    if (m_outfit.getMount() != 0) {
+        auto datType = g_things.rawGetThingType(m_outfit.getMount(), ThingCategoryCreature);
+        if (datType->getIdleAnimator() != nullptr) {
+            footAnimPhases = datType->getAnimationPhases();
+            footDelay = getStepDuration(true) / ceil(footAnimPhases / 2) + 15;
+        }
+    } else if (getIdleAnimator() != nullptr) {
+        footDelay = getStepDuration(true) / ceil(footAnimPhases / 2) + 15;
+    }
+
     // Since mount is a different outfit we need to get the mount animation phases
     if(m_outfit.getMount() != 0) {
         ThingType *type = g_things.rawGetThingType(m_outfit.getMount(), m_outfit.getCategory());
@@ -882,7 +912,7 @@ int Creature::getStepDuration(bool ignoreDiagonal, Otc::Direction dir)
     int interval = 1000;
     if(groundSpeed > 0 && speed > 0)
         interval = 1000 * groundSpeed;
-    
+
     if(g_game.getFeature(Otc::GameNewSpeedLaw)) {
         if (groundSpeed > 110 && groundSpeed < 160 && speed >= 500) {
             interval *= 1.1f;
