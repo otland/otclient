@@ -247,5 +247,5 @@ void PlatformWindow::makeScreenShot(std::string file) {
 
     glReadPixels(0, 0, getWidth(), getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
-    boost::thread thread = boost::thread(&PlatformWindow::changeScreenShotOrientation, this, pixels, arrayLength, widthLength, heightLength, file);
+    boost::thread(&PlatformWindow::changeScreenShotOrientation, this, pixels, arrayLength, widthLength, heightLength, file);
 }
