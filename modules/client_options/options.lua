@@ -272,3 +272,7 @@ end
 function addButton(name, func, icon)
   optionsTabBar:addButton(name, func, icon)
 end
+
+function removeTab(name)
+  optionsTabBar:removeTab(optionsTabBar:getTab(name))
+end
