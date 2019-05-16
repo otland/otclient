@@ -23,14 +23,6 @@ Panel
     !tooltip: tr('Display connection speed to the server (milliseconds)')
 
   OptionCheckBox
-    id: showLeftPanel
-    !text: tr('Show left panel')
-
-  OptionCheckBox
-    id: moveWindowsToPanel
-    !text: tr('Move windows to panel')
-
-  OptionCheckBox
     id: displayNames
     !text: tr('Display creature names')
 

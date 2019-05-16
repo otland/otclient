@@ -3,7 +3,11 @@ WALK_STEPS_RETRY = 10
 gameRootPanel = nil
 gameMapPanel = nil
 gameRightPanel = nil
+gameRightSecondPanel = nil
+gameRightThirdPanel = nil
 gameLeftPanel = nil
+gameLeftSecondPanel = nil
+gameLeftThirdPanel = nil
 gameBottomPanel = nil
 showTopMenuButton = nil
 logoutButton = nil
@@ -50,9 +54,18 @@ function init()
   bottomSplitter = gameRootPanel:getChildById('bottomSplitter')
   gameMapPanel = gameRootPanel:getChildById('gameMapPanel')
   gameRightPanel = gameRootPanel:getChildById('gameRightPanel')
+  gameRightSecondPanel = gameRootPanel:getChildById('gameRightSecondPanel')
+  gameRightThirdPanel = gameRootPanel:getChildById('gameRightThirdPanel')
   gameLeftPanel = gameRootPanel:getChildById('gameLeftPanel')
+  gameLeftSecondPanel = gameRootPanel:getChildById('gameLeftSecondPanel')
+  gameLeftThirdPanel = gameRootPanel:getChildById('gameLeftThirdPanel')
   gameBottomPanel = gameRootPanel:getChildById('gameBottomPanel')
+  connect(gameRightPanel, { onVisibilityChange = onRightPanelVisibilityChange })
+  connect(gameRightSecondPanel, { onVisibilityChange = onRightSecondPanelVisibilityChange })
+  connect(gameRightThirdPanel, { onVisibilityChange = onRightThirdPanelVisibilityChange })
   connect(gameLeftPanel, { onVisibilityChange = onLeftPanelVisibilityChange })
+  connect(gameLeftSecondPanel, { onVisibilityChange = onLeftSecondPanelVisibilityChange })
+  connect(gameLeftThirdPanel, { onVisibilityChange = onLeftThirdPanelVisibilityChange })
 
   logoutButton = modules.client_topmenu.addLeftButton('logoutButton', tr('Exit'),
     '/images/topbuttons/logout', tryLogout, true)
@@ -61,8 +74,6 @@ function init()
   showTopMenuButton.onClick = function()
     modules.client_topmenu.toggle()
   end
-
-  setupViewMode(0)
 
   bindKeys()
 
@@ -143,7 +154,12 @@ function terminate()
     onLoginAdvice = onLoginAdvice
   })
 
+  disconnect(gameRightPanel, { onVisibilityChange = onRightPanelVisibilityChange })
+  disconnect(gameRightSecondPanel, { onVisibilityChange = onRightSecondPanelVisibilityChange })
+  disconnect(gameRightThirdPanel, { onVisibilityChange = onRightThirdPanelVisibilityChange })
   disconnect(gameLeftPanel, { onVisibilityChange = onLeftPanelVisibilityChange })
+  disconnect(gameLeftSecondPanel, { onVisibilityChange = onLeftSecondPanelVisibilityChange })
+  disconnect(gameLeftThirdPanel, { onVisibilityChange = onLeftThirdPanelVisibilityChange })
 
   logoutButton:destroy()
   gameRootPanel:destroy()
@@ -161,7 +177,6 @@ function onGameStart()
 end
 
 function onGameEnd()
-  setupViewMode(0)
   hide()
 end
 
@@ -171,7 +186,6 @@ function show()
   gameRootPanel:show()
   gameRootPanel:focus()
   gameMapPanel:followCreature(g_game.getLocalPlayer())
-  setupViewMode(0)
   updateStretchShrink()
   logoutButton:setTooltip(tr('Logout'))
 
@@ -364,28 +378,108 @@ end
 
 function addToPanels(uiWidget)
   uiWidget.onRemoveFromContainer = function(widget)
-    if gameLeftPanel:isOn() then
-      if widget:getParent():getId() == 'gameRightPanel' then
-        if gameLeftPanel:getEmptySpaceHeight() - widget:getHeight() >= 0 then
-          widget:setParent(gameLeftPanel)
-        end
-      elseif widget:getParent():getId() == 'gameLeftPanel' then
-        if gameRightPanel:getEmptySpaceHeight() - widget:getHeight() >= 0 then
-          widget:setParent(gameRightPanel)
-        end
+    local parentWidgetId = widget:getParent():getId()
+    local widgetHeight = widget:getHeight()
+    if modules.client_options.getOption('panelPriorite') then
+      if gameRightPanel:isOn() and parentWidgetId ~= 'gameRightPanel' and gameRightPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+        widget:setParent(gameRightPanel)
+      elseif gameRightSecondPanel:isOn() and parentWidgetId ~= 'gameRightSecondPanel' and gameRightSecondPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+        widget:setParent(gameRightSecondPanel)
+      elseif gameRightThirdPanel:isOn() and parentWidgetId ~= 'gameRightThirdPanel' and gameRightThirdPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+        widget:setParent(gameRightThirdPanel)
+      elseif gameLeftPanel:isOn() and parentWidgetId ~= 'gameLeftPanel' and gameLeftPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+        widget:setParent(gameLeftPanel)
+      elseif gameLeftSecondPanel:isOn() and parentWidgetId ~= 'gameLeftSecondPanel' and gameLeftSecondPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+        widget:setParent(gameLeftSecondPanel)
+      elseif gameLeftThirdPanel:isOn() and parentWidgetId ~= 'gameLeftThirdPanel' and gameLeftThirdPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+        widget:setParent(gameLeftThirdPanel)
+      end
+    else
+      if gameLeftPanel:isOn() and parentWidgetId ~= 'gameLeftPanel' and gameLeftPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+        widget:setParent(gameLeftPanel)
+      elseif gameLeftSecondPanel:isOn() and parentWidgetId ~= 'gameLeftSecondPanel' and gameLeftSecondPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+        widget:setParent(gameLeftSecondPanel)
+      elseif gameLeftThirdPanel:isOn() and parentWidgetId ~= 'gameLeftThirdPanel' and gameLeftThirdPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+        widget:setParent(gameLeftThirdPanel)
+      elseif gameRightPanel:isOn() and parentWidgetId ~= 'gameRightPanel' and gameRightPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+        widget:setParent(gameRightPanel)
+      elseif gameRightSecondPanel:isOn() and parentWidgetId ~= 'gameRightSecondPanel' and gameRightSecondPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+        widget:setParent(gameRightSecondPanel)
+      elseif gameRightThirdPanel:isOn() and parentWidgetId ~= 'gameRightThirdPanel' and gameRightThirdPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+        widget:setParent(gameRightThirdPanel)
       end
     end
   end
 
-  if not gameLeftPanel:isOn() then
-    uiWidget:setParent(gameRightPanel)
-    return
-  end
-
-  if gameRightPanel:getEmptySpaceHeight() - uiWidget:getHeight() >= 0 then
-    uiWidget:setParent(gameRightPanel)
+  local widgetHeight = uiWidget:getHeight()
+  if modules.client_options.getOption('panelPriorite') then
+    if gameRightPanel:isOn() and gameRightPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+      uiWidget:setParent(gameRightPanel)
+    elseif gameRightSecondPanel:isOn() and gameRightSecondPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+      uiWidget:setParent(gameRightSecondPanel)
+    elseif gameRightThirdPanel:isOn() and gameRightThirdPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+      uiWidget:setParent(gameRightThirdPanel)
+    elseif gameLeftPanel:isOn() and gameLeftPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+      uiWidget:setParent(gameLeftPanel)
+    elseif gameLeftSecondPanel:isOn() and gameLeftSecondPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+      uiWidget:setParent(gameLeftSecondPanel)
+    elseif gameLeftThirdPanel:isOn() and gameLeftThirdPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+      uiWidget:setParent(gameLeftThirdPanel)
+    else --Force move to right panel
+      uiWidget:setParent(getLastPanel(true))
+    end
   else
-    uiWidget:setParent(gameLeftPanel)
+    if gameLeftPanel:isOn() and gameLeftPanel:getEmptySpaceHeight() - widgetHeight >= 0 then
+      uiWidget:setParent(gameLeftPanel)
+    elseif gameLeftSecondPanel:isOn() and (gameLeftSecondPanel:getEmptySpaceHeight() - widgetHeight) >= 0 then
+      uiWidget:setParent(gameLeftSecondPanel)
+    elseif gameLeftThirdPanel:isOn() and (gameLeftThirdPanel:getEmptySpaceHeight() - widgetHeight) >= 0 then
+      uiWidget:setParent(gameLeftThirdPanel)
+    elseif gameRightPanel:isOn() and (gameRightPanel:getEmptySpaceHeight() - widgetHeight) >= 0 then
+      uiWidget:setParent(gameRightPanel)
+    elseif gameRightSecondPanel:isOn() and (gameRightSecondPanel:getEmptySpaceHeight() - widgetHeight) >= 0 then
+      uiWidget:setParent(gameRightSecondPanel)
+    elseif gameRightThirdPanel:isOn() and (gameRightThirdPanel:getEmptySpaceHeight() - widgetHeight) >= 0 then
+      uiWidget:setParent(gameRightThirdPanel)
+    else --Force move to left panel
+      uiWidget:setParent(getLastPanel(false))
+    end
+  end
+end
+
+function getLastPanel(side) --true right | false left
+  if side then
+    if gameLeftThirdPanel:isOn() then
+      return gameLeftThirdPanel
+    elseif gameLeftSecondPanel:isOn() then
+      return gameLeftSecondPanel
+    elseif gameLeftPanel:isOn() then
+      return gameLeftPanel
+    elseif gameRightThirdPanel:isOn() then
+      return gameRightThirdPanel
+    elseif gameRightSecondPanel:isOn() then
+      return gameRightSecondPanel
+    elseif gameRightPanel:isOn() then
+      return gameRightPanel
+    else --Force add
+      return gameRootPanel
+    end
+  else
+    if gameRightThirdPanel:isOn() then
+      return gameRightThirdPanel
+    elseif gameRightSecondPanel:isOn() then
+      return gameRightSecondPanel
+    elseif gameRightPanel:isOn() then
+      return gameRightPanel
+    elseif gameLeftThirdPanel:isOn() then
+      return gameLeftThirdPanel
+    elseif gameLeftSecondPanel:isOn() then
+      return gameLeftSecondPanel
+    elseif gameLeftPanel:isOn() then
+      return gameLeftThirdPanel
+    else --Force add
+      return gameRootPanel
+    end
   end
 end
 
@@ -840,8 +934,24 @@ function getRightPanel()
   return gameRightPanel
 end
 
+function getRightSecondPanel()
+  return gameRightSecondPanel
+end
+
+function getRightThirdPanel()
+  return gameRightThirdPanel
+end
+
 function getLeftPanel()
   return gameLeftPanel
+end
+
+function getLeftSecondPanel()
+  return gameLeftSecondPanel
+end
+
+function getLeftThirdPanel()
+  return gameLeftThirdPanel
 end
 
 function getBottomPanel()
@@ -852,11 +962,96 @@ function getShowTopMenuButton()
   return showTopMenuButton
 end
 
-function onLeftPanelVisibilityChange(leftPanel, visible)
+function onRightPanelVisibilityChange(panel, visible)
+  if modules.client_options.panelsPanel:recursiveGetChildById('showRightPanel'):isChecked() then
+    modules.client_options.panelsPanel:recursiveGetChildById('showRightSecondPanel'):setEnabled(true)
+    modules.client_options.panelsPanel:recursiveGetChildById('showLeftPanel'):setEnabled(true)
+  else
+    if modules.client_options.panelsPanel:recursiveGetChildById('showRightSecondPanel'):isChecked() then
+      modules.client_options.panelsPanel:recursiveGetChildById('showRightSecondPanel'):setChecked(false)
+    end
+    modules.client_options.panelsPanel:recursiveGetChildById('showRightSecondPanel'):setEnabled(false)
+    modules.client_options.panelsPanel:recursiveGetChildById('showLeftPanel'):setEnabled(false)
+  end
+  
   if not visible and g_game.isOnline() then
-    local children = leftPanel:getChildren()
+    local children = panel:getChildren()
     for i=1,#children do
-      children[i]:setParent(gameRightPanel)
+      addToPanels(children[i])
+    end
+  end
+end
+
+function onRightSecondPanelVisibilityChange(panel, visible)
+  if modules.client_options.panelsPanel:recursiveGetChildById('showRightSecondPanel'):isChecked() then
+    modules.client_options.panelsPanel:recursiveGetChildById('showRightThirdPanel'):setEnabled(true)
+  else
+    if modules.client_options.panelsPanel:recursiveGetChildById('showRightThirdPanel'):isChecked() then
+      modules.client_options.panelsPanel:recursiveGetChildById('showRightThirdPanel'):setChecked(false)
+    end
+    modules.client_options.panelsPanel:recursiveGetChildById('showRightThirdPanel'):setEnabled(false)
+  end
+  
+  if not visible and g_game.isOnline() then
+    local children = panel:getChildren()
+    for i=1,#children do
+      addToPanels(children[i])
+    end
+  end
+end
+
+function onRightThirdPanelVisibilityChange(panel, visible)
+  if not visible and g_game.isOnline() then
+    local children = panel:getChildren()
+    for i=1,#children do
+      addToPanels(children[i])
+    end
+  end
+end
+
+function onLeftPanelVisibilityChange(panel, visible)
+  if modules.client_options.panelsPanel:recursiveGetChildById('showLeftPanel'):isChecked() then
+    modules.client_options.panelsPanel:recursiveGetChildById('showLeftSecondPanel'):setEnabled(true)
+    modules.client_options.panelsPanel:recursiveGetChildById('showRightPanel'):setEnabled(true)
+  else
+    if modules.client_options.panelsPanel:recursiveGetChildById('showLeftSecondPanel'):isChecked() then
+      modules.client_options.panelsPanel:recursiveGetChildById('showLeftSecondPanel'):setChecked(false)
+    end
+    modules.client_options.panelsPanel:recursiveGetChildById('showLeftSecondPanel'):setEnabled(false)
+    modules.client_options.panelsPanel:recursiveGetChildById('showRightPanel'):setEnabled(false)
+  end
+
+  if not visible and g_game.isOnline() then
+    local children = panel:getChildren()
+    for i=1,#children do
+      addToPanels(children[i])
+    end
+  end
+end
+
+function onLeftSecondPanelVisibilityChange(panel, visible)
+  if modules.client_options.panelsPanel:recursiveGetChildById('showLeftSecondPanel'):isChecked() then
+    modules.client_options.panelsPanel:recursiveGetChildById('showLeftThirdPanel'):setEnabled(true)
+  else
+    if modules.client_options.panelsPanel:recursiveGetChildById('showLeftThirdPanel'):isChecked() then
+      modules.client_options.panelsPanel:recursiveGetChildById('showLeftThirdPanel'):setChecked(false)
+    end
+    modules.client_options.panelsPanel:recursiveGetChildById('showLeftThirdPanel'):setEnabled(false)
+  end
+
+  if not visible and g_game.isOnline() then
+    local children = panel:getChildren()
+    for i=1,#children do
+      addToPanels(children[i])
+    end
+  end
+end
+
+function onLeftThirdPanelVisibilityChange(panel, visible)
+  if not visible and g_game.isOnline() then
+    local children = panel:getChildren()
+    for i=1,#children do
+      addToPanels(children[i])
     end
   end
 end
@@ -869,15 +1064,24 @@ function setupViewMode(mode)
   if mode == currentViewMode then return end
 
   if currentViewMode == 2 then
-    gameMapPanel:addAnchor(AnchorLeft, 'gameLeftPanel', AnchorRight)
-    gameMapPanel:addAnchor(AnchorRight, 'gameRightPanel', AnchorLeft)
+    gameMapPanel:addAnchor(AnchorLeft, 'gameLeftThirdPanel', AnchorRight)
+    gameMapPanel:addAnchor(AnchorRight, 'gameRightThirdPanel', AnchorLeft)
     gameMapPanel:addAnchor(AnchorBottom, 'gameBottomPanel', AnchorTop)
     gameRootPanel:addAnchor(AnchorTop, 'topMenu', AnchorBottom)
     gameLeftPanel:setOn(modules.client_options.getOption('showLeftPanel'))
     gameLeftPanel:setImageColor('white')
+    gameLeftSecondPanel:setImageColor('white')
+    gameLeftThirdPanel:setImageColor('white')
+    gameRightPanel:setOn(modules.client_options.getOption('showRightPanel'))
     gameRightPanel:setImageColor('white')
+    gameRightSecondPanel:setImageColor('white')
+    gameRightThirdPanel:setImageColor('white')
     gameLeftPanel:setMarginTop(0)
+    gameLeftSecondPanel:setMarginTop(0)
+    gameLeftThirdPanel:setMarginTop(0)
     gameRightPanel:setMarginTop(0)
+    gameRightSecondPanel:setMarginTop(0)
+    gameRightThirdPanel:setMarginTop(0)
     gameBottomPanel:setImageColor('white')
     modules.client_topmenu.getTopMenu():setImageColor('white')
     g_game.changeMapAwareRange(18, 14)
@@ -895,20 +1099,35 @@ function setupViewMode(mode)
     gameMapPanel:setVisibleDimension({ width = 15, height = 11 })
   elseif mode == 2 then
     local limit = limitedZoom and not g_game.isGM()
+    gameMapPanel:setKeepAspectRatio(false)
     gameMapPanel:setLimitVisibleRange(limit)
     gameMapPanel:setZoom(11)
     gameMapPanel:setVisibleDimension({ width = 15, height = 11 })
     gameMapPanel:fill('parent')
     gameRootPanel:fill('parent')
+    modules.client_background.getBackground():fill('parent')
     gameLeftPanel:setImageColor('alpha')
+    gameLeftSecondPanel:setImageColor('alpha')
+    gameLeftThirdPanel:setImageColor('alpha')
     gameRightPanel:setImageColor('alpha')
+    gameRightSecondPanel:setImageColor('alpha')
+    gameRightThirdPanel:setImageColor('alpha')
     gameLeftPanel:setMarginTop(modules.client_topmenu.getTopMenu()
       :getHeight() - gameLeftPanel:getPaddingTop())
+    gameLeftSecondPanel:setMarginTop(modules.client_topmenu.getTopMenu()
+      :getHeight() - gameLeftSecondPanel:getPaddingTop())
+    gameLeftThirdPanel:setMarginTop(modules.client_topmenu.getTopMenu()
+      :getHeight() - gameLeftThirdPanel:getPaddingTop())
     gameRightPanel:setMarginTop(modules.client_topmenu.getTopMenu()
       :getHeight() - gameRightPanel:getPaddingTop())
+    gameRightSecondPanel:setMarginTop(modules.client_topmenu.getTopMenu()
+      :getHeight() - gameRightSecondPanel:getPaddingTop())
+    gameRightThirdPanel:setMarginTop(modules.client_topmenu.getTopMenu()
+      :getHeight() - gameRightThirdPanel:getPaddingTop())
     gameLeftPanel:setOn(true)
     gameLeftPanel:setVisible(true)
     gameRightPanel:setOn(true)
+    gameRightPanel:setVisible(true)
     gameMapPanel:setOn(true)
     gameBottomPanel:setImageColor('#ffffff88')
     modules.client_topmenu.getTopMenu():setImageColor('#ffffff66')

@@ -1,0 +1,83 @@
+Panel
+  ButtonBox
+    id: normalViewMode
+    anchors.left: parent.left
+    anchors.top: parent.top
+    text: Normal
+    size: 100 20
+
+  ButtonBox
+    id: resizedViewMode
+    anchors.left: prev.right
+    anchors.verticalCenter: prev.verticalCenter
+    text: Resized
+    size: 100 20
+    margin-left: 4
+
+  ButtonBox
+    id: transparentViewMode
+    anchors.left: prev.right
+    anchors.verticalCenter: prev.verticalCenter
+    text: Transparent
+    size: 100 20
+    margin-left: 4
+
+  Label
+    id: panelPrioriteLabel
+    !text: tr('Panel priorite')
+    anchors.left: parent.left
+    anchors.top: normalViewMode.bottom
+    margin-top: 8
+    width: 100
+
+  ButtonBox
+    id: leftPanelMode
+    anchors.left: panelPrioriteLabel.right
+    anchors.top: normalViewMode.bottom
+    margin-top: 5
+    text: Left
+    size: 100 20
+
+  ButtonBox
+    id: rightPanelMode
+    anchors.left: leftPanelMode.right
+    anchors.top: normalViewMode.bottom
+    margin-top: 5
+    text: Right
+    size: 100 20
+    margin-left: 4
+
+  OptionCheckBox
+    id: showRightPanel
+    !text: tr('Show right panel')
+    anchors.top: leftPanelMode.bottom
+    anchors.right: parent.right
+    anchors.left: parent.left
+    margin-top: 5
+
+  OptionCheckBox
+    id: showRightSecondPanel
+    !text: tr('Show right second panel')
+
+  OptionCheckBox
+    id: showRightThirdPanel
+    !text: tr('Show right third panel')
+    enabled: false
+
+  OptionCheckBox
+    id: showLeftPanel
+    !text: tr('Show left panel')
+
+  OptionCheckBox
+    id: showLeftSecondPanel
+    !text: tr('Show left second panel')
+    enabled: false
+
+  OptionCheckBox
+    id: showLeftThirdPanel
+    !text: tr('Show left third panel')
+    enabled: false
+
+  OptionCheckBox
+    id: moveWindowsToPanel
+    !text: tr('Move windows to panel')

@@ -14,7 +14,16 @@ local defaultOptions = {
   showLevelsInConsole = true,
   showPrivateMessagesInConsole = true,
   showPrivateMessagesOnScreen = true,
+  normalViewMode = true,
+  resizedViewMode = false,
+  transparentViewMode = false,
+  showRightPanel = true,
+  showRightSecondPanel = false,
+  showRightThirdPanel = false,
   showLeftPanel = false,
+  showLeftSecondPanel = false,
+  showLeftThirdPanel = false,
+  panelPriorite = true,
   moveWindowsToPanel = false,
   foregroundFrameRate = 61,
   backgroundFrameRate = 201,
@@ -42,6 +51,8 @@ local consolePanel
 local graphicsPanel
 local soundPanel
 local audioButton
+local viewModeRadioGroup
+local panelPrioriteRadioGroup
 
 local function setupGraphicsEngines()
   local enginesRadioGroup = UIRadioGroup.create()
@@ -113,6 +124,46 @@ function init()
   audioPanel = g_ui.loadUI('audio')
   optionsTabBar:addTab(tr('Audio'), audioPanel, '/images/optionstab/audio')
 
+  panelsPanel = g_ui.loadUI('panels')
+  optionsTabBar:addTab(tr('Panels'), panelsPanel, '/images/optionstab/panels')
+  --Additional panels actions
+  --Choose view mode
+  viewModeRadioGroup = UIRadioGroup.create()
+  local normalViewMode = panelsPanel:getChildById('normalViewMode')
+  local resizedViewMode = panelsPanel:getChildById('resizedViewMode')
+  local transparentViewMode = panelsPanel:getChildById('transparentViewMode')
+  viewModeRadioGroup:addWidget(normalViewMode)
+  viewModeRadioGroup:addWidget(resizedViewMode)
+  viewModeRadioGroup:addWidget(transparentViewMode)
+  viewModeRadioGroup.onSelectionChange = function(self, selected)
+    if selected == normalViewMode then
+      setOption('resizedViewMode', false)
+      setOption('transparentViewMode', false)
+      setOption('normalViewMode', true)
+    elseif selected == resizedViewMode then
+      setOption('normalViewMode', false)
+      setOption('transparentViewMode', false)
+      setOption('resizedViewMode', true)
+    elseif selected == transparentViewMode then
+      setOption('normalViewMode', false)
+      setOption('resizedViewMode', false)
+      setOption('transparentViewMode', true)
+    end
+  end
+  --Choose panel priorite
+  panelPrioriteRadioGroup = UIRadioGroup.create()
+  local leftPanelMode = panelsPanel:getChildById('leftPanelMode')
+  local rightPanelMode = panelsPanel:getChildById('rightPanelMode')
+  panelPrioriteRadioGroup:addWidget(leftPanelMode)
+  panelPrioriteRadioGroup:addWidget(rightPanelMode)
+  panelPrioriteRadioGroup.onSelectionChange = function(self, selected)
+    if selected == rightPanelMode then
+      setOption('panelPriorite', true)
+    elseif selected == leftPanelMode then
+      setOption('panelPriorite', false)
+    end
+  end
+
   optionsButton = modules.client_topmenu.addLeftButton('optionsButton', tr('Options'), '/images/topbuttons/options', toggle)
   audioButton = modules.client_topmenu.addLeftButton('audioButton', tr('Audio'), '/images/topbuttons/audio', function() toggleOption('enableAudio') end)
 
@@ -125,6 +176,8 @@ function terminate()
   optionsWindow:destroy()
   optionsButton:destroy()
   audioButton:destroy()
+  viewModeRadioGroup:destroy()
+  panelPrioriteRadioGroup:destroy()
 end
 
 function setup()
@@ -202,8 +255,39 @@ function setOption(key, value, force)
   elseif key == 'musicSoundVolume' then
     g_sounds.getChannel(SoundChannels.Music):setGain(value/100)
     audioPanel:getChildById('musicSoundVolumeLabel'):setText(tr('Music volume: %d', value))
+  elseif key == 'normalViewMode' then
+    if value then
+      viewModeRadioGroup:selectWidget(panelsPanel:getChildById('normalViewMode'))
+      modules.game_interface.setupViewMode(0)
+    end
+  elseif key == 'resizedViewMode' then
+    if value then
+      viewModeRadioGroup:selectWidget(panelsPanel:getChildById('resizedViewMode'))
+      modules.game_interface.setupViewMode(1)
+    end
+  elseif key == 'transparentViewMode' then
+    if value then
+      viewModeRadioGroup:selectWidget(panelsPanel:getChildById('transparentViewMode'))
+      modules.game_interface.setupViewMode(2)
+    end
+  elseif key == 'panelPriorite' then
+    if value then
+      panelPrioriteRadioGroup:selectWidget(panelsPanel:getChildById('rightPanelMode'))
+    else
+      panelPrioriteRadioGroup:selectWidget(panelsPanel:getChildById('leftPanelMode'))
+    end
+  elseif key == 'showRightPanel' then
+    modules.game_interface.getRightPanel():setOn(value)
+  elseif key == 'showRightSecondPanel' then
+    modules.game_interface.getRightSecondPanel():setOn(value)
+  elseif key == 'showRightThirdPanel' then
+    modules.game_interface.getRightThirdPanel():setOn(value)
   elseif key == 'showLeftPanel' then
     modules.game_interface.getLeftPanel():setOn(value)
+  elseif key == 'showLeftSecondPanel' then
+    modules.game_interface.getLeftSecondPanel():setOn(value)
+  elseif key == 'showLeftThirdPanel' then
+    modules.game_interface.getLeftThirdPanel():setOn(value)
   elseif key == 'moveWindowsToPanel' then
     g_settings.set('moveWindowsToPanel', true)
   elseif key == 'backgroundFrameRate' then
