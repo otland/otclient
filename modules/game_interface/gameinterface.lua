@@ -462,7 +462,7 @@ function getLastPanel(side) --true right | false left
     elseif gameRightPanel:isOn() then
       return gameRightPanel
     else --Force add
-      return gameRootPanel
+      return gameRootPanel --TODO Add to main screen when no panels is on (now not used).
     end
   else
     if gameRightThirdPanel:isOn() then
@@ -478,7 +478,7 @@ function getLastPanel(side) --true right | false left
     elseif gameLeftPanel:isOn() then
       return gameLeftThirdPanel
     else --Force add
-      return gameRootPanel
+      return gameRootPanel --TODO Add to main screen when no panels is on (now not used).
     end
   end
 end
@@ -966,6 +966,9 @@ function onRightPanelVisibilityChange(panel, visible)
   if modules.client_options.panelsPanel:recursiveGetChildById('showRightPanel'):isChecked() then
     modules.client_options.panelsPanel:recursiveGetChildById('showRightSecondPanel'):setEnabled(true)
     modules.client_options.panelsPanel:recursiveGetChildById('showLeftPanel'):setEnabled(true)
+    if not modules.client_options.panelsPanel:recursiveGetChildById('showLeftPanel'):isChecked() then
+      modules.client_options.panelsPanel:recursiveGetChildById('showRightPanel'):setEnabled(false)
+    end
   else
     if modules.client_options.panelsPanel:recursiveGetChildById('showRightSecondPanel'):isChecked() then
       modules.client_options.panelsPanel:recursiveGetChildById('showRightSecondPanel'):setChecked(false)
@@ -1013,6 +1016,9 @@ function onLeftPanelVisibilityChange(panel, visible)
   if modules.client_options.panelsPanel:recursiveGetChildById('showLeftPanel'):isChecked() then
     modules.client_options.panelsPanel:recursiveGetChildById('showLeftSecondPanel'):setEnabled(true)
     modules.client_options.panelsPanel:recursiveGetChildById('showRightPanel'):setEnabled(true)
+    if not modules.client_options.panelsPanel:recursiveGetChildById('showRightPanel'):isChecked() then
+      modules.client_options.panelsPanel:recursiveGetChildById('showLeftPanel'):setEnabled(false)
+    end
   else
     if modules.client_options.panelsPanel:recursiveGetChildById('showLeftSecondPanel'):isChecked() then
       modules.client_options.panelsPanel:recursiveGetChildById('showLeftSecondPanel'):setChecked(false)
