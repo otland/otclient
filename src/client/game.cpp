@@ -519,8 +519,12 @@ void Game::processModalDialog(uint32 id, std::string title, std::string message,
 
 void Game::processAttackCancel(uint seq)
 {
-    if(isAttacking() && (seq == 0 || m_seq == seq))
-        cancelAttack();
+    if(seq == 0 || m_seq == seq) {
+        if(isAttacking())
+            cancelAttack();
+        else
+            setAttackingCreature(nullptr);
+    }
 }
 
 void Game::processWalkCancel(Otc::Direction direction)
