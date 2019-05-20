@@ -58,6 +58,7 @@ Panel
   OptionCheckBox
     id: showRightSecondPanel
     !text: tr('Show right second panel')
+    enabled: false
 
   OptionCheckBox
     id: showRightThirdPanel
