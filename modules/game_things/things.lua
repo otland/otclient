@@ -25,8 +25,8 @@ function load()
     datPath = resolvepath('/things/' .. filename)
     sprPath = resolvepath('/things/' .. filename)
   else
-    datPath = resolvepath('/things/' .. version .. '/Tibia')
-    sprPath = resolvepath('/things/' .. version .. '/Tibia')
+    datPath = resolvepath('/things/' .. version .. '/Tibia.dat')
+    sprPath = resolvepath('/things/' .. version .. '/Tibia.spr')
   end
 
   local errorMessage = ''
