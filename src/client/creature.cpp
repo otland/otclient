@@ -119,7 +119,7 @@ void Creature::internalDrawOutfit(Point dest, float scaleFactor, bool animateWal
             }
         }
 
-        if(isAnimateAlways())
+        if(isAnimateAlways() && getAnimator() != nullptr)
             animationPhase = getAnimator()->getPhase();
 
         // xPattern => creature direction
@@ -916,7 +916,7 @@ int Creature::getStepDuration(bool ignoreDiagonal, Otc::Direction dir)
         double formulatedSpeed = 1.0;
         formulatedSpeed = std::max<double>(1, (double)floor((857.36 * log((speed / 2) + 261.29) + -4795.01) + 0.5));
         interval = std::floor(interval / (double)formulatedSpeed);
-        
+
         if(isLocalPlayer())
             interval *= 1.12f;
         else if(isPlayer())
@@ -940,7 +940,7 @@ int Creature::getStepDuration(bool ignoreDiagonal, Otc::Direction dir)
     if(g_game.getClientVersion() >= 1098 && !this->isLocalPlayer()) {
         return (int)interval*0.8f;
     }
-    
+
     return interval;
 }
 
