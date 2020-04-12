@@ -510,7 +510,7 @@ void Creature::updateWalkAnimation(int totalPixelsWalked)
     if(m_outfit.getCategory() != ThingCategoryCreature)
         return;
 
-    int footAnimPhases = getAnimationPhases() - 1;
+    int footAnimPhases = std::max<int>(1, getAnimationPhases() - 1);
     int footDelay = getStepDuration(true) / getAnimationPhases() + 15;
     if (m_outfit.getMount() != 0) {
         auto datType = g_things.rawGetThingType(m_outfit.getMount(), ThingCategoryCreature);
