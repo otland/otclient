@@ -510,19 +510,17 @@ void Creature::updateWalkAnimation(int totalPixelsWalked)
     if(m_outfit.getCategory() != ThingCategoryCreature)
         return;
 
-    int footAnimPhases = getAnimationPhases() - 1;
-    int footDelay = getStepDuration(true) / getAnimationPhases() + 15;
+    int footAnimPhases, footDelay;
     if (m_outfit.getMount() != 0) {
+        // Since mount is a different outfit we need to get the mount animation phases
         auto datType = g_things.rawGetThingType(m_outfit.getMount(), ThingCategoryCreature);
-        footAnimPhases = datType->getAnimationPhases() - 1;
-        if (datType->getIdleAnimator() != nullptr) {
-            footDelay = getStepDuration(true) / ceil(footAnimPhases / 2) + 15;
-        }
-    } else if (getIdleAnimator() != nullptr) {
-        footDelay = getStepDuration(true) / ceil(footAnimPhases / 2) + 15;
+        footAnimPhases = datType->getAnimationPhases();
+    } else {
+        footAnimPhases = getAnimationPhases();
     }
+    footAnimPhases = std::max<int>(0, footAnimPhases - 1);
+    footDelay = getStepDuration(true) / std::max<int>(1, footAnimPhases);
 
-    // Since mount is a different outfit we need to get the mount animation phases
     if(footAnimPhases == 0)
         m_walkAnimationPhase = 0;
     else if(m_footStepDrawn && m_footTimer.ticksElapsed() >= footDelay && totalPixelsWalked < 32) {
@@ -540,9 +538,8 @@ void Creature::updateWalkAnimation(int totalPixelsWalked)
             if(!self->m_walking || self->m_walkTimer.ticksElapsed() >= self->getStepDuration(true))
                 self->m_walkAnimationPhase = 0;
             self->m_walkFinishAnimEvent = nullptr;
-        }, std::min<int>(footDelay, 200));
+        }, footDelay);
     }
-
 }
 
 void Creature::updateWalkOffset(int totalPixelsWalked)
