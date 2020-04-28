@@ -36,9 +36,9 @@ public:
     Thing();
     virtual ~Thing() { }
 
-    virtual void draw(const Point& dest, float scaleFactor, bool animate, LightView *lightView = nullptr) { }
+    virtual void draw(const Point&, float, bool, LightView* = nullptr) { }
 
-    virtual void setId(uint32 id) { }
+    virtual void setId(uint32) { }
     void setPosition(const Position& position);
 
     virtual uint32 getId() { return 0; }
@@ -124,7 +124,7 @@ public:
     bool isTopEffect() { return rawGetThingType()->isTopEffect(); }
     MarketData getMarketData() { return rawGetThingType()->getMarketData(); }
 
-    virtual void onPositionChange(const Position& newPos, const Position& oldPos) { }
+    virtual void onPositionChange(const Position&, const Position&) { }
     virtual void onAppear() { }
     virtual void onDisappear() { }
 

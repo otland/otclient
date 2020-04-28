@@ -305,7 +305,7 @@ std::string Crypt::sha512Encode(const std::string& decoded_string, bool upperCas
 }
 
 
-void Crypt::rsaGenerateKey(int bits, int e)
+void Crypt::rsaGenerateKey(int, int)
 {
     // disabled because new OpenSSL changes broke
     /*
