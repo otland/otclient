@@ -412,7 +412,7 @@ struct push_tuple_internal_luavalue {
 template<>
 struct push_tuple_internal_luavalue<0> {
     template<typename Tuple>
-    static void call(const Tuple& tuple) { }
+    static void call(const Tuple&) { }
 };
 
 template<typename... Args>
