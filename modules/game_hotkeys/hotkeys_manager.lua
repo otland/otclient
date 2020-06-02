@@ -10,6 +10,7 @@ HotkeyColors = {
   itemUseSelf = '#00FF00',
   itemUseTarget = '#FF0000',
   itemUseWith = '#F5B325',
+  action = '#FF00FF',
 }
 
 hotkeysManagerLoaded = false
@@ -28,6 +29,7 @@ clearObjectButton = nil
 useOnSelf = nil
 useOnTarget = nil
 useWith = nil
+hotkeyAction = nil
 defaultComboKeys = nil
 perServer = true
 perCharacter = true
@@ -37,12 +39,14 @@ currentHotkeys = nil
 boundCombosCallback = {}
 hotkeysList = {}
 lastHotkeyTime = g_clock.millis()
+actionList = {}
 
 -- public functions
 function init()
   hotkeysButton = modules.client_topmenu.addLeftGameButton('hotkeysButton', tr('Hotkeys') .. ' (Ctrl+K)', '/images/topbuttons/hotkeys', toggle)
   g_keyboard.bindKeyDown('Ctrl+K', toggle)
   hotkeysWindow = g_ui.displayUI('hotkeys_manager')
+  addAction('Hotkeys manager', 'Toggle window', toggle)
   hotkeysWindow:setVisible(false)
 
   currentHotkeys = hotkeysWindow:getChildById('currentHotkeys')
@@ -54,6 +58,8 @@ function init()
   sendAutomatically = hotkeysWindow:getChildById('sendAutomatically')
   selectObjectButton = hotkeysWindow:getChildById('selectObjectButton')
   clearObjectButton = hotkeysWindow:getChildById('clearObjectButton')
+  hotkeyAction = hotkeysWindow:getChildById('hotkeyAction')
+  clearAction = hotkeysWindow:getChildById('clearAction')
   useOnSelf = hotkeysWindow:getChildById('useOnSelf')
   useOnTarget = hotkeysWindow:getChildById('useOnTarget')
   useWith = hotkeysWindow:getChildById('useWith')
@@ -219,7 +225,9 @@ function save()
       itemId = child.itemId,
       subType = child.subType,
       useType = child.useType,
-      value = child.value
+      value = child.value,
+      module = child.module,
+      actionName = child.actionName
     }
   end
 
@@ -302,8 +310,53 @@ function clearObject()
   currentHotkeyLabel.useType = nil
   currentHotkeyLabel.autoSend = nil
   currentHotkeyLabel.value = nil
+  currentHotkeyLabel.module = nil
+  currentHotkeyLabel.actionName = nil
   updateHotkeyLabel(currentHotkeyLabel)
   updateHotkeyForm(true)
+end
+
+function startChooseAction()
+  local actionWindow = g_ui.createWidget('HotkeyActionWindow', rootWidget)
+
+  local modComboBox = actionWindow:recursiveGetChildById('modComboBox')
+  local actionComboBox = actionWindow:recursiveGetChildById('actionComboBox')
+
+  for k,v in pairs(actionList) do
+    modComboBox:addOption(k)
+  end
+
+  if modComboBox:getCurrentOption() then
+    for k,v in pairs(actionList[modComboBox:getCurrentOption().text]) do
+      actionComboBox:addOption(k)
+    end
+
+    actionComboBox:setEnabled(true)
+  end
+
+  modComboBox.onOptionChange = function(obj, text, data)
+    if not actionList[text] then
+      return
+    end
+
+    actionComboBox:clearOptions()
+    actionComboBox:setEnabled(false)
+
+    for k,v in pairs(actionList[text]) do
+      actionComboBox:addOption(k)
+      actionComboBox:setEnabled(true)
+    end
+
+    if actionComboBox:getCurrentOption() then
+      actionComboBox:setEnabled(true)
+    end
+  end
+
+  local addButton = actionWindow:recursiveGetChildById('addButton')
+  addButton.onClick = function()
+    hotkeySetAction(modComboBox:getText(), actionComboBox:getText())
+    actionWindow:destroy()
+  end
 end
 
 function addHotkey()
@@ -348,6 +401,8 @@ function addKeyCombo(keyCombo, keySettings, focus)
       hotkeyLabel.itemId = tonumber(keySettings.itemId)
       hotkeyLabel.subType = tonumber(keySettings.subType)
       hotkeyLabel.useType = tonumber(keySettings.useType)
+      hotkeyLabel.module = keySettings.module
+      hotkeyLabel.actionName = keySettings.actionName
       if keySettings.value then hotkeyLabel.value = tostring(keySettings.value) end
     else
       hotkeyLabel.keyCombo = keyCombo
@@ -355,6 +410,8 @@ function addKeyCombo(keyCombo, keySettings, focus)
       hotkeyLabel.itemId = nil
       hotkeyLabel.subType = nil
       hotkeyLabel.useType = nil
+      hotkeyLabel.module = nil
+      hotkeyLabel.actionName = nil
       hotkeyLabel.value = ''
     end
 
@@ -382,11 +439,19 @@ function doKeyCombo(keyCombo)
   lastHotkeyTime = g_clock.millis()
 
   if hotKey.itemId == nil then
-    if not hotKey.value or #hotKey.value == 0 then return end
-    if hotKey.autoSend then
-      modules.game_console.sendMessage(hotKey.value)
+    if hotKey.module and hotKey.actionName then
+      if actionList[hotKey.module] and actionList[hotKey.module][hotKey.actionName] then
+        actionList[hotKey.module][hotKey.actionName]()
+      else
+        pwarning('Choosen hotkey [' .. keyCombo .. '] action [' .. hotKey.module .. ' | ' .. hotKey.actionName .. '] doesn\'t exist.')
+      end
     else
-      modules.game_console.setTextEditText(hotKey.value)
+      if not hotKey.value or #hotKey.value == 0 then return end
+      if hotKey.autoSend then
+        modules.game_console.sendMessage(hotKey.value)
+      else
+        modules.game_console.setTextEditText(hotKey.value)
+      end
     end
   elseif hotKey.useType == HOTKEY_MANAGER_USE then
     if g_game.getClientVersion() < 780 or hotKey.subType then
@@ -454,6 +519,9 @@ function updateHotkeyLabel(hotkeyLabel)
   elseif hotkeyLabel.itemId ~= nil then
     hotkeyLabel:setText(tr('%s: (use object)', hotkeyLabel.keyCombo))
     hotkeyLabel:setColor(HotkeyColors.itemUse)
+  elseif hotkeyLabel.module and hotkeyLabel.actionName then
+    hotkeyLabel:setText(hotkeyLabel.keyCombo .. ': ' .. hotkeyLabel.module .. ' | ' .. hotkeyLabel.actionName)
+    hotkeyLabel:setColor(HotkeyColors.action)
   else
     local text = hotkeyLabel.keyCombo .. ': '
     if hotkeyLabel.value then
@@ -479,6 +547,8 @@ function updateHotkeyForm(reset)
       sendAutomatically:disable()
       selectObjectButton:disable()
       clearObjectButton:enable()
+      hotkeyAction:disable()
+      clearAction:disable()
       currentItemPreview:setItemId(currentHotkeyLabel.itemId)
       if currentHotkeyLabel.subType then
         currentItemPreview:setItemSubType(currentHotkeyLabel.subType)
@@ -508,6 +578,12 @@ function updateHotkeyForm(reset)
       hotkeyText:enable()
       hotkeyText:focus()
       hotKeyTextLabel:enable()
+      hotkeyAction:enable()
+      if currentHotkeyLabel.module or currentHotkeyLabel.actionName then
+        clearAction:enable()
+      else
+        clearAction:disable()
+      end
       if reset then
         hotkeyText:setCursorPos(-1)
       end
@@ -531,6 +607,8 @@ function updateHotkeyForm(reset)
     useRadioGroup:clearSelected()
     sendAutomatically:setChecked(false)
     currentItemPreview:clearItem()
+    hotkeyAction:disable()
+    clearAction:disable()
   end
 end
 
@@ -596,4 +674,30 @@ end
 function hotkeyCaptureOk(assignWindow, keyCombo)
   addKeyCombo(keyCombo, nil, true)
   assignWindow:destroy()
+end
+
+function hotkeySetAction(module, actionName)
+  currentHotkeyLabel.module = module
+  currentHotkeyLabel.actionName = actionName
+  updateHotkeyLabel(currentHotkeyLabel)
+end
+
+function addAction(module, actionName, func)
+  if not actionList[module] then
+    actionList[module] = {}
+  end
+
+  actionList[module][actionName] = func
+end
+
+function removeAction(module, actionName)
+  actionName = actionName or false
+
+  if not actionName then
+    actionList[module] = nil
+  else
+    if actionList[module] and actionList[module][actionName] then
+      actionList[module][actionName] = nil
+    end
+  end
 end

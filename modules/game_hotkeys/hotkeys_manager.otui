@@ -11,7 +11,7 @@ HotkeyListLabel < UILabel
 MainWindow
   id: hotkeysWindow
   !text: tr('Hotkeys')
-  size: 340 410
+  size: 340 445
 
   @onEnter: modules.game_hotkeys.ok()
   @onEscape: modules.game_hotkeys.cancel()
@@ -157,6 +157,25 @@ MainWindow
     checked: false
     margin-top: 2
 
+  Button
+    id: hotkeyAction
+    !text: tr('Add action')
+    width: 128
+    enabled: false
+    anchors.left: parent.left
+    anchors.top: prev.bottom
+    margin-top: 8
+    @onClick: modules.game_hotkeys.startChooseAction()
+
+  Button
+    id: clearAction
+    !text: tr('Clear action')
+    width: 128
+    enabled: false
+    anchors.right: parent.right
+    anchors.top: prev.top
+    @onClick: modules.game_hotkeys.clearObject()
+
   HorizontalSeparator
     id: separator
     anchors.left: parent.left
@@ -202,6 +221,53 @@ HotkeyAssignWindow < MainWindow
     anchors.top: prev.bottom
     margin-top: 10
     text-auto-resize: true
+
+  HorizontalSeparator
+    id: separator
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: next.top
+    margin-bottom: 10
+
+  Button
+    id: addButton
+    !text: tr('Add')
+    width: 64
+    anchors.right: next.left
+    anchors.bottom: parent.bottom
+    margin-right: 10
+    @onClick: modules.game_hotkeys.hotkeyCaptureOk(self:getParent(), self:getParent():getChildById('comboPreview').keyCombo)
+
+  Button
+    id: cancelButton
+    !text: tr('Cancel')
+    width: 64
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    @onClick: self:getParent():destroy()
+
+HotkeyActionWindow < MainWindow
+  id: actionWindow
+  !text: tr('Button Action')
+  size: 230 150
+  @onEscape: self:destroy()
+
+  ComboBox
+    id: modComboBox
+    width: 200
+    anchors.left: parent.left
+    anchors.top: parent.top
+    margin-top: 5
+    mouse-scroll: false
+
+  ComboBox
+    id: actionComboBox
+    width: 200
+    enabled: false
+    anchors.left: parent.left
+    anchors.top: prev.bottom
+    margin-top: 5
+    mouse-scroll: false
 
   HorizontalSeparator
     id: separator
