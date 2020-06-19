@@ -543,8 +543,8 @@ void ProtocolGame::parseCompleteStorePurchase(const InputMessagePtr& msg)
     msg->getU8();
 
     std::string message = msg->getString();
-    msg->getU32(); // coins
-    msg->getU32(); // transferable coins
+    int coins = msg->getU32();
+    int transferableCoins = msg->getU32();
 
     g_logger.info(stdext::format("Purchase Complete: %s\nAvailable coins: %d (transferable: %d)", message, coins, transferableCoins));
 }
