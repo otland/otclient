@@ -2,7 +2,8 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <PREPROCESSOR_DEFS>WIN32;
+    <PREPROCESSOR_DEFS>
+        WIN32;
         _CRT_SECURE_NO_WARNINGS;
         _WIN32_WINNT=0x0501;
         BOT_PROTECTION;
@@ -16,7 +17,9 @@
         BUILD_COMMIT="$(BUILD_COMMIT)";
         BUILD_REVISION="$(BUILD_REVISION)";
         VERSION="$(VERSION)";
-        AB</PREPROCESSOR_DEFS>
+        AB
+    </PREPROCESSOR_DEFS>
+
     <OTCLIENT_LIBDEPS>
         glew32.lib;
         zlib.lib;
@@ -38,7 +41,7 @@
     <OTCLIENT_LIBDEPS_D>
         glew32d.lib;
         zlibd.lib;
-        libcrypto.lib;
+        zstdd.lib;
         physfs.lib;
         openal32.lib;
         lua51.lib;
@@ -72,7 +75,6 @@
     <Link>
       <AdditionalDependencies>$(OTCLIENT_LIBDEPS)</AdditionalDependencies>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
-      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>

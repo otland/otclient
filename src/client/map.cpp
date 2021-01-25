@@ -362,12 +362,12 @@ void Map::cleanTile(const Position& pos)
             notificateTileUpdate(pos);
         }
     }
-    for(auto it = m_staticTexts.begin();it != m_staticTexts.end();) {
-        const StaticTextPtr& staticText = *it;
+    for(auto itt = m_staticTexts.begin();itt != m_staticTexts.end();) {
+        const StaticTextPtr& staticText = *itt;
         if(staticText->getPosition() == pos && staticText->getMessageMode() == Otc::MessageNone)
-            it = m_staticTexts.erase(it);
+            itt = m_staticTexts.erase(itt);
         else
-            ++it;
+            ++itt;
     }
 }
 
@@ -751,7 +751,7 @@ std::tuple<std::vector<Otc::Direction>, Otc::PathFindResult> Map::findPath(const
     // check the goal pos is walkable
     if(g_map.isAwareOfPosition(goalPos)) {
         const TilePtr goalTile = getTile(goalPos);
-        if(!goalTile || !goalTile->isWalkable()) {
+        if(!goalTile || !goalTile->isWalkable((flags & Otc::PathFindAllowCreatures))) {
             return ret;
         }
     }
@@ -763,7 +763,7 @@ std::tuple<std::vector<Otc::Direction>, Otc::PathFindResult> Map::findPath(const
     }
 
     std::unordered_map<Position, Node*, PositionHasher> nodes;
-    std::priority_queue<std::pair<Node*, float>, std::vector<std::pair<Node*, float>>, LessNode> searchList;
+    std::priority_queue<std::pair<Node*, float>, std::deque<std::pair<Node*, float>>, LessNode> searchList;
 
     Node *currentNode = new Node(startPos);
     currentNode->pos = startPos;
@@ -799,7 +799,7 @@ std::tuple<std::vector<Otc::Direction>, Otc::PathFindResult> Map::findPath(const
                     wasSeen = true;
                     if(const TilePtr& tile = getTile(neighborPos)) {
                         hasCreature = tile->hasCreature();
-                        isNotWalkable = !tile->isWalkable();
+                        isNotWalkable = !tile->isWalkable((flags & Otc::PathFindAllowCreatures));
                         isNotPathable = !tile->isPathable();
                         speed = tile->getGroundSpeed();
                     }

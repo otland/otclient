@@ -493,9 +493,8 @@ void ProtocolGame::parseStore(const InputMessagePtr& msg)
 {
     parseCoinBalance(msg);
 
-    // Parse all categories
-    int count = msg->getU16();
-    for(int i = 0; i < count; i++) {
+    int categories = msg->getU16();
+    for(int i = 0; i < categories; i++) {
         std::string category = msg->getString();
         std::string description = msg->getString();
 
@@ -512,7 +511,7 @@ void ProtocolGame::parseStore(const InputMessagePtr& msg)
 
         // If this is a valid category name then
         // the category we just parsed is a child of that
-        std::string parentCategory = msg->getString();
+        msg->getString();
     }
 }
 
@@ -544,10 +543,10 @@ void ProtocolGame::parseCompleteStorePurchase(const InputMessagePtr& msg)
     msg->getU8();
 
     std::string message = msg->getString();
-    msg->getU32(); // coins
-    msg->getU32(); // transferable coins
+    uint32_t coins = msg->getU32(); // coins
+    uint32_t transferableCoins = msg->getU32(); // transferable coins
 
-    g_logger.info(stdext::format("Purchase Complete: %s", message));
+    g_logger.info(stdext::format("Purchase Complete: %s\nAvailable coins: %d (transferable: %d)", message, coins, transferableCoins));
 }
 
 void ProtocolGame::parseStoreTransactionHistory(const InputMessagePtr &msg)
@@ -573,7 +572,7 @@ void ProtocolGame::parseStoreTransactionHistory(const InputMessagePtr &msg)
 
 void ProtocolGame::parseStoreOffers(const InputMessagePtr& msg)
 {
-    std::string categoryName = msg->getString();
+    msg->getString(); // categoryName
 
     int offers = msg->getU16();
     for(int i = 0; i < offers; i++) {
@@ -589,26 +588,27 @@ void ProtocolGame::parseStoreOffers(const InputMessagePtr& msg)
         }
 
         int disabledState = msg->getU8();
-        std::string disabledReason = "";
         if(g_game.getFeature(Otc::GameIngameStoreHighlights) && disabledState == 1) {
-            disabledReason = msg->getString();
+            msg->getString(); // disabledReason
         }
 
-        int icons = msg->getU8();
-        for(int j = 0; j < icons; j++) {
+        std::vector<std::string> icons;
+        int iconCount = msg->getU8();
+        for(int j = 0; j < iconCount; j++) {
             std::string icon = msg->getString();
+            icons.push_back(icon);
         }
 
         int subOffers = msg->getU16();
         for(int j = 0; j < subOffers; j++) {
-            std::string name = msg->getString();
-            std::string description = msg->getString();
+            msg->getString(); // name
+            msg->getString(); // description
 
             int subIcons = msg->getU8();
             for(int k = 0; k < subIcons; k++) {
-                std::string icon = msg->getString();
+                msg->getString(); // icon
             }
-            std::string serviceType = msg->getString();
+            msg->getString(); // serviceType
         }
     }
 }
@@ -1938,7 +1938,7 @@ void ProtocolGame::parsePlayerInventory(const InputMessagePtr& msg)
 
 void ProtocolGame::parseModalDialog(const InputMessagePtr& msg)
 {
-    uint32 modalWindowId = msg->getU32();
+    uint32 windowId = msg->getU32();
     std::string title = msg->getString();
     std::string message = msg->getString();
 
@@ -1970,7 +1970,7 @@ void ProtocolGame::parseModalDialog(const InputMessagePtr& msg)
 
     bool priority = msg->getU8() == 0x01;
 
-    g_game.processModalDialog(modalWindowId, title, message, buttonList, enterButton, escapeButton, choiceList, priority);
+    g_game.processModalDialog(windowId, title, message, buttonList, enterButton, escapeButton, choiceList, priority);
 }
 
 void ProtocolGame::parseExtendedOpcode(const InputMessagePtr& msg)
