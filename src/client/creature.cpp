@@ -504,7 +504,7 @@ void Creature::onDeath()
     callLuaField("onDeath");
 }
 
-void Creature::updateWalkAnimation(int totalPixelsWalked)
+void Creature::updateWalkAnimation(int totalPixelsWalked, int stepDuration)
 {
     // update outfit animation
     if(m_outfit.getCategory() != ThingCategoryCreature)
@@ -513,7 +513,7 @@ void Creature::updateWalkAnimation(int totalPixelsWalked)
     int footAnimPhases = getAnimationPhases() - 1;
     int footDelay = getStepDuration(true) / getAnimationPhases() + 15;
     if (m_outfit.getMount() != 0) {
-        auto datType = g_things.rawGetThingType(m_outfit.getMount(), ThingCategoryCreature);
+        auto datType = g_things.rawGetThingType(m_outfit.getMount(), m_outfit.getCategory());
         footAnimPhases = datType->getAnimationPhases() - 1;
         if (datType->getIdleAnimator() != nullptr) {
             footDelay = getStepDuration(true) / ceil(footAnimPhases / 2) + 15;
@@ -606,20 +606,20 @@ void Creature::nextWalkUpdate()
         m_walkUpdateEvent = g_dispatcher.scheduleEvent([self] {
             self->m_walkUpdateEvent = nullptr;
             self->nextWalkUpdate();
-        }, getStepDuration() / 32);
+        }, getStepDuration(true) / Otc::TILE_PIXELS);
     }
 }
 
 void Creature::updateWalk()
 {
-    float walkTicksPerPixel = getStepDuration(true) / 32;
-    int totalPixelsWalked = std::min<int>(m_walkTimer.ticksElapsed() / walkTicksPerPixel, 32.0f);
+    int stepDuration = getStepDuration(true);
+    int totalPixelsWalked = stepDuration ? std::min<int>((m_walkTimer.ticksElapsed() * Otc::TILE_PIXELS) / stepDuration, Otc::TILE_PIXELS) : 0;
 
     // needed for paralyze effect
     m_walkedPixels = std::max<int>(m_walkedPixels, totalPixelsWalked);
 
     // update walk animation and offsets
-    updateWalkAnimation(totalPixelsWalked);
+    updateWalkAnimation(totalPixelsWalked, stepDuration);
     updateWalkOffset(m_walkedPixels);
     updateWalkingTile();
 
