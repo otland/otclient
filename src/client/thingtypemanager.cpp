@@ -297,6 +297,7 @@ void ThingTypeManager::parseItemType(uint16 serverId, TiXmlElement* elem)
         itemType = getItemType(serverId);
 
     itemType->setName(elem->Attribute("name"));
+    itemType->setPluralName(elem->Attribute("plural"));
     for(TiXmlElement* attrib = elem->FirstChildElement(); attrib; attrib = attrib->NextSiblingElement()) {
         std::string key = attrib->Attribute("key");
         if(key.empty())
@@ -356,11 +357,28 @@ const ItemTypePtr& ThingTypeManager::findItemTypeByName(std::string name)
     return m_nullItemType;
 }
 
+const ItemTypePtr& ThingTypeManager::findItemTypeByPluralName(std::string pluralName)
+{
+    for(const ItemTypePtr& it : m_itemTypes)
+        if(it->getPluralName() == pluralName)
+            return it;
+    return m_nullItemType;
+}
+
 ItemTypeList ThingTypeManager::findItemTypesByName(std::string name)
 {
     ItemTypeList ret;
     for(const ItemTypePtr& it : m_itemTypes)
         if(it->getName() == name)
+            ret.push_back(it);
+    return ret;
+}
+
+ItemTypeList ThingTypeManager::findItemTypesByPluralName(std::string pluralName)
+{
+    ItemTypeList ret;
+    for(const ItemTypePtr& it : m_itemTypes)
+        if(it->getPluralName() == pluralName)
             ret.push_back(it);
     return ret;
 }

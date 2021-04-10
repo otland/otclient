@@ -78,7 +78,8 @@ enum ItemTypeAttr : uint8 {
     ItemTypeAttrTopOrder         = 43,
     ItemTypeAttrWrtiable3        = 44,   // deprecated
     ItemTypeAttrWareId           = 45,
-    ItemTypeAttrLast             = 46
+    ItemTypeAttrPluralName       = 46,
+    ItemTypeAttrLast             = 47
 };
 
 enum ClientVersion
@@ -145,6 +146,9 @@ public:
 
     void setName(const std::string& name) { m_attribs.set(ItemTypeAttrName, name); }
     std::string getName() { return m_attribs.get<std::string>(ItemTypeAttrName); }
+
+    void setPluralName(const std::string& pluralName) { m_attribs.set(ItemTypeAttrPluralName, pluralName); }
+    std::string getPluralName() { return m_attribs.get<std::string>(ItemTypeAttrPluralName); }
 
     void setDesc(const std::string& desc) { m_attribs.set(ItemTypeAttrDesc, desc); }
     std::string getDesc() { return m_attribs.get<std::string>(ItemTypeAttrDesc); }
