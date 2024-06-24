@@ -69,7 +69,9 @@ void Client::registerLuaFunctions()
     g_lua.bindSingletonFunction("g_things", "getThingTypes", &ThingTypeManager::getThingTypes, &g_things);
     g_lua.bindSingletonFunction("g_things", "findItemTypeByClientId", &ThingTypeManager::findItemTypeByClientId, &g_things);
     g_lua.bindSingletonFunction("g_things", "findItemTypeByName", &ThingTypeManager::findItemTypeByName, &g_things);
+    g_lua.bindSingletonFunction("g_things", "findItemTypeByPluralName", &ThingTypeManager::findItemTypeByPluralName, &g_things);
     g_lua.bindSingletonFunction("g_things", "findItemTypesByName", &ThingTypeManager::findItemTypesByName, &g_things);
+    g_lua.bindSingletonFunction("g_things", "findItemTypesByPluralName", &ThingTypeManager::findItemTypesByPluralName, &g_things);
     g_lua.bindSingletonFunction("g_things", "findItemTypesByString", &ThingTypeManager::findItemTypesByString, &g_things);
     g_lua.bindSingletonFunction("g_things", "findItemTypeByCategory", &ThingTypeManager::findItemTypeByCategory, &g_things);
     g_lua.bindSingletonFunction("g_things", "findThingTypeByAttr", &ThingTypeManager::findThingTypeByAttr, &g_things);
@@ -484,6 +486,11 @@ void Client::registerLuaFunctions()
     g_lua.registerClass<ItemType>();
     g_lua.bindClassMemberFunction<ItemType>("getServerId", &ItemType::getServerId);
     g_lua.bindClassMemberFunction<ItemType>("getClientId", &ItemType::getClientId);
+    g_lua.bindClassMemberFunction<ItemType>("getCategory", &ItemType::getCategory);
+    g_lua.bindClassMemberFunction<ItemType>("getName", &ItemType::getName);
+    g_lua.bindClassMemberFunction<ItemType>("getPluralName", &ItemType::getPluralName);
+    g_lua.bindClassMemberFunction<ItemType>("getDesc", &ItemType::getDesc);
+    g_lua.bindClassMemberFunction<ItemType>("isNull", &ItemType::isNull);
     g_lua.bindClassMemberFunction<ItemType>("isWritable",  &ItemType::isWritable);
 
     g_lua.registerClass<ThingType>();
